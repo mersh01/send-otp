@@ -16,6 +16,8 @@ app.use(bodyParser.json());
 
 // New verify OTP route
 app.post('/verify-otp', async (req, res) => {
+      console.log("Received in /verify-otp:", req.body); // 👈 Log incoming request
+
   const { verification_sid, otp } = req.body;
 
   if (!verification_sid || !otp) {
@@ -37,6 +39,7 @@ app.post('/verify-otp', async (req, res) => {
       res.json({ status: 'pending', message: 'Invalid OTP code or verification pending' });
     }
   } catch (error) {
+        console.error("Twilio error:", error); // 👈 Log any Twilio errors
     res.status(500).json({ status: 'error', message: error.message || 'Verification failed' });
   }
 });
