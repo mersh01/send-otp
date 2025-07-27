@@ -16,12 +16,14 @@ app.use(bodyParser.json());
 
 // New verify OTP route
 app.post('/verify-otp', async (req, res) => {
-      console.log("Received in /verify-otp:", req.body); // 👈 Log incoming request
+  console.log("Received in /verify-otp:", req.body); // 👈 Log incoming request
 
   const { verification_sid, otp } = req.body;
 
   if (!verification_sid || !otp) {
-    return res.status(400).json({ status: 'error', message: 'Missing parameters' });
+    const errorResponse = { status: 'error', message: 'Missing parameters' };
+    console.log("Sending response:", errorResponse);
+    return res.status(400).json(errorResponse);
   }
 
   try {
@@ -34,14 +36,19 @@ app.post('/verify-otp', async (req, res) => {
       });
 
     if (verification_check.status === 'approved') {
-      res.json({ status: 'approved', message: 'OTP verified successfully' });
+      const successResponse = { status: 'approved', message: 'OTP verified successfully' };
+      console.log("Sending response:", successResponse);
+      res.json(successResponse);
     } else {
-      res.json({ status: 'pending', message: 'Invalid OTP code or verification pending' });
+      const pendingResponse = { status: 'pending', message: 'Invalid OTP code or verification pending' };
+      console.log("Sending response:", pendingResponse);
+      res.json(pendingResponse);
     }
   } catch (error) {
-        console.error("Twilio error:", error); // 👈 Log any Twilio errors
-
-    res.status(500).json({ status: 'error', message: error.message || 'Verification failed' });
+    const errorResponse = { status: 'error', message: error.message || 'Verification failed' };
+    console.error("Twilio error:", error);
+    console.log("Sending response:", errorResponse);
+    res.status(500).json(errorResponse);
   }
 });
 
