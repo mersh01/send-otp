@@ -16,14 +16,13 @@ app.use(bodyParser.json());
 
 // New verify OTP route
 app.post("/verify-otp", async (req, res) => {
-  const { otp } = req.body;
+  const { verification_sid, otp } = req.body;
   console.log("Received in /verify-otp:", req.body);
 
   try {
     const verificationCheck = await client.verify.v2
-      .services(serviceSid)
-      .verificationChecks
-      .create({ code: otp, to: req.body.phone });
+      .services(verification_sid)
+      .verificationChecks.create({ code: otp });
 
     console.log("Verification check result:", verificationCheck.status);
     res.json({ success: verificationCheck.status === "approved" });
@@ -32,7 +31,6 @@ app.post("/verify-otp", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-
 
 
 // Existing send OTP route
