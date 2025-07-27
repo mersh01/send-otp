@@ -15,31 +15,25 @@ const client = twilio(accountSid, authToken);
 app.use(bodyParser.json());
 
 // New verify OTP route
-app.post('/verify-otp', async (req, res) => {
+app.post("/verify-otp", async (req, res) => {
+  const { otp } = req.body;
   console.log("Received in /verify-otp:", req.body);
 
-  const { verification_sid, otp } = req.body;
-
-  if (!verification_sid || !otp) {
-    return res.status(400).json({ status: 'error', message: 'Missing parameters' });
-  }
-
   try {
-    const verification_check = await client.verify.v2.verificationChecks.create({
-      code: otp,
-      verificationSid: verification_sid
-    });
+    const verificationCheck = await client.verify.v2
+      .services(serviceSid)
+      .verificationChecks
+      .create({ code: otp, to: req.body.phone });
 
-    if (verification_check.status === 'approved') {
-      res.json({ status: 'approved', message: 'OTP verified successfully' });
-    } else {
-      res.json({ status: 'pending', message: 'Invalid OTP or verification pending' });
-    }
+    console.log("Verification check result:", verificationCheck.status);
+    res.json({ success: verificationCheck.status === "approved" });
   } catch (error) {
-    console.error("Twilio error:", error);
-    res.status(500).json({ status: 'error', message: error.message || 'Verification failed' });
+    console.error("Twilio verification error:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
+
+
 
 // Existing send OTP route
 app.post('/send-otp', async (req, res) => {
