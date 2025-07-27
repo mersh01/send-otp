@@ -14,22 +14,6 @@ const client = twilio(accountSid, authToken);
 
 app.use(bodyParser.json());
 
-// Existing send OTP route
-app.post('/send-otp', async (req, res) => {
-  const phone = req.body.phone;
-  if (!phone) {
-    return res.status(400).json({ status: 'error', message: 'Phone number required' });
-  }
-  try {
-    const verification = await client.verify.v2.services(serviceSid)
-      .verifications
-      .create({ to: phone, channel: 'sms' });
-    res.json({ status: 'success', verification_sid: verification.sid });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message || 'Failed to send OTP' });
-  }
-});
-
 // New verify OTP route
 app.post('/verify-otp', async (req, res) => {
   const { verification_sid, otp } = req.body;
@@ -54,6 +38,22 @@ app.post('/verify-otp', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message || 'Verification failed' });
+  }
+});
+
+// Existing send OTP route
+app.post('/send-otp', async (req, res) => {
+  const phone = req.body.phone;
+  if (!phone) {
+    return res.status(400).json({ status: 'error', message: 'Phone number required' });
+  }
+  try {
+    const verification = await client.verify.v2.services(serviceSid)
+      .verifications
+      .create({ to: phone, channel: 'sms' });
+    res.json({ status: 'success', verification_sid: verification.sid });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message || 'Failed to send OTP' });
   }
 });
 
